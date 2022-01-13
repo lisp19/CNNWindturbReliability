@@ -17,7 +17,7 @@ Since the data scale of NO.12 wind turb is not enough compared with the target f
 + Model training and tuning
 + Evaluate the model
 
-The prediction accuracy is 93%. For some reason, the original true labels can not be given here. However, the accuracy is validated by course instructors before.
+The prediction accuracy is ***93%***. For some reason, the original true labels can not be given here. However, the accuracy is validated by course instructors before.
 
 # Environment Description
 
