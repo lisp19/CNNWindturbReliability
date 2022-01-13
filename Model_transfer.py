@@ -1,4 +1,4 @@
-# 迁移学习代码
+# This file is used for construct a model on target domain 
 
 import tensorflow as tf
 import tensorflow.keras
@@ -20,10 +20,11 @@ from tensorflow.keras import optimizers
 from tensorflow.keras.callbacks import ModelCheckpoint
 import math
 
+# Load data from local disk
 X = np.load('Data/Test.npy',allow_pickle = True)
 np.random.shuffle(X)
-# 读取训练数据并打乱
 
+# Data spliting and reorganize
 X_train,X_test,Y_train,Y_test = train_test_split(X[:,0:75],X[:,75],test_size = 0.25)
 X_test = X_test.reshape(X_test.shape[0], X_test.shape[1],1)
 X_test = tf.convert_to_tensor(X_test,dtype = 'float32')
@@ -36,17 +37,24 @@ X_test_1 = pd.read_pickle('Data/Test1.pkl')
 X_test_0 = pd.read_pickle('Data/Test0.pkl')
 testnum = len(X_test_1) + len(X_test_0)
 
+# Callback function to save current best model on validation data
 cp = ModelCheckpoint('Model_transfer/Best_Model_Transfer.hdf5', monitor = 'val_accuracy', verbose=1,save_best_only=True,mode='max',period = 1)
 callbacks_list = [cp]
 
+# Load model on the source domain from disk
 model_src = load_model('Model/Best_Model.hdf5')
 
+# Construct model on the target domain 
+# Remove the last 5 layers
+# Set front layers untrainable to keep model parameters
 model = Sequential()
 for layer in model_src.layers[:-5]:
     model.add(layer)
 
 for layer in model.layers:
     layer.trainable = False
+
+# Adding new layers
 model.add(Dense(128,name = 'new1'))
 model.add(LeakyReLU(alpha = 0.05, name = 'relu1'))
 model.add(Dropout(rate = 0.5, name = 'drop01'))
@@ -59,7 +67,9 @@ adm = optimizers.Adam(learning_rate = 0.0001, decay = 1e-6)
 model.compile(loss = 'categorical_crossentropy',optimizer = adm,metrics=['accuracy'])
 model.summary()
 
-def show_train_history(train_history,train,validation):#建立显示训练过程，类似于tensorbroad
+# Visualize the training process
+# Can be replaced by tensorboard for deep research
+def show_train_history(train_history,train,validation):
     plt.plot(train_history.history[train])
     plt.plot(train_history.history[validation])
     plt.title('Train History'+"-"+train)
@@ -69,12 +79,14 @@ def show_train_history(train_history,train,validation):#建立显示训练过程
     plt.show()
     pass
 
+# Model training
 train_history = model.fit(x = X_train, y = Y_train,epochs = 300,   verbose = 1, validation_split = 0.1,  callbacks = callbacks_list, shuffle = True)
-model.save('Model_transfer/Model.h5')
+
 
 show_train_history(train_history,'accuracy','val_accuracy') 
 show_train_history(train_history,'loss','val_loss')
 
+# Model evaluation
 scores = model.evaluate(X_test,Y_test)
 
 print('Predicting.............')

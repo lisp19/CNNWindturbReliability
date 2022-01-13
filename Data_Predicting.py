@@ -1,3 +1,6 @@
+# This file is used to reorganize data on the target domain
+# Since the data of target domain may change with the demand of system
+# The section is delicatedly organized
 import numpy as np
 import os
 import time

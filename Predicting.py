@@ -1,4 +1,4 @@
-#用于给出预测结果
+# This file is used to give the prediction result
 
 import tensorflow as tf
 import tensorflow.keras
@@ -20,14 +20,16 @@ from tensorflow.keras import optimizers
 from tensorflow.keras.callbacks import ModelCheckpoint
 import math
 
+# Load data for predicting
 X = pd.read_pickle('Data/Predicting.pkl')
 n = len(X)
 res = np.array([])
 keys = np.array([])
 
+# Load model
 model = load_model('Model_transfer/Best_Model_Transfer.hdf5')
-# 相对路径， 读取模型文件，H5/HDF5均可
 
+# Prediction
 print('Predicting.............')
 
 for key in X.keys():
@@ -50,6 +52,7 @@ for key in X.keys():
     keys = np.append(keys,key)
     pass
 
+# Reorganize data and saving to local disk as CSV
 keys = keys.reshape(len(keys),1)
 res = res.reshape(len(res),1)
 result = np.append(keys, res, axis = 1)

@@ -1,3 +1,4 @@
+# This file is used for the data preprocessing
 import numpy as np
 import os
 import time
@@ -6,12 +7,19 @@ import pickle
 from sklearn.preprocessing import MinMaxScaler
 
 T1 = time.time()
+# Data is the labels of current files
 data = pd.read_csv('Source/train_labels.csv')
+
+
 print(data.info())
 print(data.head(20))
+
+# datasets is used to storage the train data
 datasets = {}
 errors = set()
 n = data.shape[0]
+
+# Get the file name and store in dictionary
 for i in range(n):
 	path = 'Source/' + ('0'+str(data.iloc[n - i - 1,0])if data.iloc[n - i - 1,0]>=10 else '00'+str(data.iloc[n - i - 1,0]))+ '/' + data.iloc[n - i - 1,1]
 	if os.path.exists(path):
@@ -27,6 +35,8 @@ for i in range(n):
 		pass
 	else:
 		errors.add(data.iloc[n - i - 1,0])
+
+# Data load status
 print(len(datasets))
 T2 = time.time()
 print('The dataloading needs %s seconds.' % (T2-T1))
@@ -34,6 +44,7 @@ for key in datasets.keys():
 	print('key: %s length: %s' % (key,len(datasets[key])))
 print(errors if len(errors) != 0 else 'No error occurs when loading.')
 
+# Data normalization with sklearn
 scaler = MinMaxScaler(feature_range = (0,1))
 X_train1 = np.array(pd.concat(datasets[(11,1.0)])).astype('float32')
 Y_train1 = (np.array([1.0]*len(X_train1)).reshape(len(X_train1),1).astype('float32'))
@@ -68,7 +79,7 @@ for key in datasets.keys():
 
 scaler.fit(X_train)
 scaler.fit(X_test)
-# 采用X的训练和测试数据对归一化器进行训练
+
 for i in range(len(X_target)):
     X_target[i] = np.array(X_target[i])
     scaler.fit(X_target[i])
@@ -79,7 +90,6 @@ for i in range(len(X_test_0)):
     X_test_0[i] = np.array(X_test_0[i])
     scaler.fit(X_test_0[i])
 
-
 X_train = scaler.transform(X_train)
 X_test = scaler.transform(X_test)
 for i in range(len(X_target)):
@@ -88,16 +98,15 @@ for i in range(len(X_test_1)):
     X_test_1[i] = scaler.transform(X_test_1[i])
 for i in range(len(X_test_0)):
     X_test_0[i] = scaler.transform(X_test_0[i])
-# 标准化
 
-
+# Data reorganization and saving to local disk
 X = np.append(X_train,Y_train,axis = 1)
 np.random.shuffle(X)
 X1 = np.append(X_test,Y_test, axis = 1)
 np.random.shuffle(X1)
 np.save('Data/Train.npy',X)
 np.save('Data/Test.npy',X1)
-# 打乱并保存到本地
+
 with open('Data/Test1.pkl','wb') as file1:
     pickle.dump(X_test_1,file1)
 with open('Data/Test0.pkl','wb') as file0:

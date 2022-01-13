@@ -1,6 +1,6 @@
-# 根据模型需求，调整了数据预处理的方式
-# 以‘Data_Predicting.py’文件生产的PKL文件为基础
-# 生成训练数据、预测数据、预测数据源数据等
+# This file is used for the preprocessing of data on source domain
+# Since the data of target domain may change with the demand of system
+# The section is delicatedly organized
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import numpy as np
@@ -10,8 +10,6 @@ import pickle
 datasets = pd.read_pickle('Data/datasets.pkl')
 data = pd.read_pickle('Data/datasets_predicting.pkl')
 scaler = MinMaxScaler(feature_range = (0,1))
-# 使用sklearn提供的标准化方法对数据进行归一化
-
 
 X_train1 = np.array(pd.concat(datasets[(11,1.0)])).astype('float32')
 Y_train1 = (np.array([1.0]*len(X_train1)).reshape(len(X_train1),1).astype('float32'))
@@ -46,7 +44,7 @@ for key in datasets.keys():
 
 scaler.fit(X_train)
 scaler.fit(X_test)
-# 采用X的训练和测试数据对归一化器进行训练
+
 for i in range(len(X_target)):
     X_target[i] = np.array(X_target[i])
     scaler.fit(X_target[i])
